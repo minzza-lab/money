@@ -11,6 +11,8 @@ interface Product {
   category: string;
   isRocket: boolean;
   badge?: string;
+  originalPrice?: string;
+  discountRate?: string;
 }
 
 const App: React.FC = () => {
@@ -23,15 +25,22 @@ const App: React.FC = () => {
 
   return (
     <div className="app-container">
+      {/* 긴급 공지 티커 */}
       <div className="ticker">
         <div className="ticker-content">
-          📢 마트에서 무겁게 들고 가지 마세요! 🚀 지금 주문하면 내일 아침 문 앞 로켓배송! 🔥
+          🔥 실시간 급상승! 🚀 마트보다 저렴한 생필품 모음전! 🔥 지금 주문하면 내일 아침 도착! 🚚💨
         </div>
       </div>
 
-      <header>
-        <h1 className="main-title">로켓배송 스마트 쇼핑 🛒</h1>
-        <p className="sub-title">무거운 짐은 쿠팡에게, 쇼핑은 즐겁게!</p>
+      <header className="hero-section">
+        <div className="hero-content">
+          <h1 className="main-title">쿠팡 큐레이터 <span>MINZZA</span> 🛒</h1>
+          <p className="sub-title">"인생을 건" 최저가 쇼핑 정보만 모았습니다.</p>
+        </div>
+        <div className="search-dummy">
+          <input type="text" placeholder="검색어를 입력하세요..." readOnly />
+          <button>🔍</button>
+        </div>
       </header>
 
       <nav className="category-bar">
@@ -50,22 +59,31 @@ const App: React.FC = () => {
         {filteredProducts.map((product: Product) => (
           <div key={product.id} className="product-card">
             {product.badge && <div className="badge">{product.badge}</div>}
-            <img src={product.image} alt={product.name} className="product-image" />
-            <h3 className="product-name">{product.name}</h3>
-            <p className="product-price">{product.price}</p>
-            {product.isRocket && (
-              <div className="rocket-badge">🚀 로켓배송 </div>
-            )}
-            <a href={product.link} target="_blank" rel="noopener noreferrer" className="buy-btn">
-              최저가 확인하기
-            </a>
+            <div className="image-container">
+              <img src={product.image} alt={product.name} className="product-image" />
+              {product.isRocket && (
+                <div className="rocket-icon">🚀</div>
+              )}
+            </div>
+            <div className="info-container">
+              <h3 className="product-name">{product.name}</h3>
+              <div className="price-info">
+                {product.discountRate && <span className="discount">{product.discountRate}</span>}
+                <p className="product-price">{product.price}</p>
+              </div>
+              <a href={product.link} target="_blank" rel="noopener noreferrer" className="buy-btn">
+                최저가 보러가기
+              </a>
+            </div>
           </div>
         ))}
       </main>
 
-      <footer>
-        <p>쿠팡 파트너스 활동의 일환으로 수수료를 제공받을 수 있습니다.</p>
-        <p>© 2026 Coupang Partners Curation Project</p>
+      <footer className="footer">
+        <div className="footer-notice">
+          <p>쿠팡 파트너스 활동의 일환으로 수수료를 제공받을 수 있습니다.</p>
+          <p>© 2026 Minzza Lab Coupang Project. All rights reserved.</p>
+        </div>
       </footer>
     </div>
   );
