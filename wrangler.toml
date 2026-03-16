@@ -1,21 +1,10 @@
-# Cloudflare Workers 및 Pages 배포 설정
-# Wrangler: Cloudflare 클라우드 플랫폼에 배포하기 위한 도구
-
-# 프로젝트 이름 (Cloudflare Dashboard에서 보이는 이름)
+# Cloudflare Pages 배포 설정
+# 프로젝트 이름
 name = "money"
 
-# 빌드 결과물이 들어있는 폴더 (npm run build 후 결과물 위치)
+# 빌드 결과물 폴더
 pages_build_output_dir = "dist"
 
-# Cloudflare 계정 ID (배포할 계정을 지정)
-account_id = "d387d8cc7c0e0790c6c36ef74791f4c1"
-
-# 환경 변수 설정 섹션
+# 환경 변수 설정
 [vars]
-# Node.js 버전 지정 (서버리스 함수에서 사용할 버전)
 NODE_VERSION = "20"
-
-# 데이터베이스 설정 (선택사항)
-# 현재는 정적 페이지만 배포하므로 활성화하지 않음
-# 나중에 데이터베이스가 필요하면 여기에 설정 추가
-[[env.production.d1_databases]]
