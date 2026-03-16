@@ -3,7 +3,7 @@
     "id": 1,
     "name": "탐사수 무라벨 생수 2L x 12개",
     "price": "12,900원",
-    "image": "https://img1a.coupangcdn.com/image/retail/images/2021/04/21/11/4/2e0f2f3d-5f3e-4f3e-8f3e-8f3e8f3e8f3e.jpg",
+    "image": "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=800&auto=format&fit=crop",
     "link": "https://link.coupang.com/a/your-id",
     "category": "무거운 생필품",
     "isRocket": true,
@@ -13,7 +13,7 @@
     "id": 2,
     "name": "곰곰 2024년 햅쌀 10kg",
     "price": "34,500원",
-    "image": "https://img1a.coupangcdn.com/image/retail/images/2024/02/01/10/2/1a1b1c1d-1e1f-1g1h-1i1j-1k1l1m1n1o1p.jpg",
+    "image": "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=800&auto=format&fit=crop",
     "link": "https://link.coupang.com/a/your-id",
     "category": "무거운 생필품",
     "isRocket": true,
@@ -23,10 +23,48 @@
     "id": 3,
     "name": "살림백서 액체세탁세제 2L x 4개",
     "price": "18,900원",
-    "image": "https://img1a.coupangcdn.com/image/retail/images/2023/05/10/09/5/2a2b2c2d-2e2f-2g2h-2i2j-2k2l2m2n2o2p.jpg",
+    "image": "https://images.unsplash.com/photo-1583947581924-860bda6a26df?w=800&auto=format&fit=crop",
     "link": "https://link.coupang.com/a/your-id",
     "category": "무거운 생필품",
     "isRocket": true,
     "badge": "인기폭발"
+  },
+  {
+    "id": 4,
+    "name": "쿠쿠 압력밥솥 6인용",
+    "price": "158,000원",
+    "image": "https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?w=800&auto=format&fit=crop",
+    "link": "https://link.coupang.com/a/your-id",
+    "category": "가전디지털",
+    "isRocket": true,
+    "badge": "최저가"
+  },
+  {
+    "id": 5,
+    "name": "필립스 에어프라이어 대용량",
+    "price": "89,000원",
+    "image": "https://images.unsplash.com/photo-1584269575184-25305cc98f94?w=800&auto=format&fit=crop",
+    "link": "https://link.coupang.com/a/your-id",
+    "category": "가전디지털",
+    "isRocket": true
+  },
+  {
+    "id": 6,
+    "name": "스텐 믹싱볼 3종 세트",
+    "price": "22,500원",
+    "image": "https://images.unsplash.com/photo-1594385208974-2e75f9d8ca28?w=800&auto=format&fit=crop",
+    "link": "https://link.coupang.com/a/your-id",
+    "category": "주방용품",
+    "isRocket": false,
+    "badge": "베스트"
+  },
+  {
+    "id": 7,
+    "name": "햇반 발아현미밥 210g x 12개",
+    "price": "15,400원",
+    "image": "https://images.unsplash.com/photo-1516684732162-798a0062be99?w=800&auto=format&fit=crop",
+    "link": "https://link.coupang.com/a/your-id",
+    "category": "간편식품",
+    "isRocket": true
   }
 ]
