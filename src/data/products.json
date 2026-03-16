@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "name": "탐사수 무라벨 생수 2L x 12개",
+    "price": "12,900원",
+    "image": "https://img1a.coupangcdn.com/image/retail/images/2021/04/21/11/4/2e0f2f3d-5f3e-4f3e-8f3e-8f3e8f3e8f3e.jpg",
+    "link": "https://link.coupang.com/a/your-id",
+    "category": "무거운 생필품",
+    "isRocket": true,
+    "badge": "품절임박"
+  },
+  {
+    "id": 2,
+    "name": "곰곰 2024년 햅쌀 10kg",
+    "price": "34,500원",
+    "image": "https://img1a.coupangcdn.com/image/retail/images/2024/02/01/10/2/1a1b1c1d-1e1f-1g1h-1i1j-1k1l1m1n1o1p.jpg",
+    "link": "https://link.coupang.com/a/your-id",
+    "category": "무거운 생필품",
+    "isRocket": true,
+    "badge": "가성비최고"
+  },
+  {
+    "id": 3,
+    "name": "살림백서 액체세탁세제 2L x 4개",
+    "price": "18,900원",
+    "image": "https://img1a.coupangcdn.com/image/retail/images/2023/05/10/09/5/2a2b2c2d-2e2f-2g2h-2i2j-2k2l2m2n2o2p.jpg",
+    "link": "https://link.coupang.com/a/your-id",
+    "category": "무거운 생필품",
+    "isRocket": true,
+    "badge": "인기폭발"
+  }
+]
