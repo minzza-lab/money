@@ -2,7 +2,7 @@
 # Wrangler: Cloudflare 클라우드 플랫폼에 배포하기 위한 도구
 
 # 프로젝트 이름 (Cloudflare Dashboard에서 보이는 이름)
-name = "minzza-test"
+name = "money"
 
 # 빌드 결과물이 들어있는 폴더 (npm run build 후 결과물 위치)
 pages_build_output_dir = "dist"
