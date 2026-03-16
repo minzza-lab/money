@@ -82,7 +82,7 @@ const App: React.FC = () => {
       <footer className="footer">
         <div className="footer-notice">
           <p>쿠팡 파트너스 활동의 일환으로 수수료를 제공받을 수 있습니다.</p>
-          <p>© 2026 Minzza Lab Coupang Project. All rights reserved.</p>
+          <p>© 2026 민짜 랩 쿠팡 프로젝트. 모든 권리 보유.</p>
         </div>
       </footer>
     </div>
