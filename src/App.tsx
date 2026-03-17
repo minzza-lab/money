@@ -37,7 +37,9 @@ const App: React.FC = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch(SHEET_URL);
+      // 캐시 방지를 위해 주소 뒤에 랜덤한 번호를 붙입니다 (t=시간값)
+      const cacheBuster = `&t=${new Date().getTime()}`;
+      const response = await fetch(SHEET_URL + cacheBuster);
       const data = await response.text();
       const rows = data.split('\n').slice(1);
       const parsedData = rows.map((row, index) => {
