@@ -233,13 +233,39 @@ const App: React.FC = () => {
           )}
 
           {extractedData && (
-            <div className="extracted-preview">
-              <img src={extractedData.image} alt="preview" />
-              <div className="ext-info">
-                <p><strong>명칭:</strong> {extractedData.name}</p>
-                <p><strong>가격:</strong> {extractedData.price}</p>
+            <div className="extracted-preview-v2">
+              <div className="ext-top">
+                <img src={extractedData.image} alt="preview" />
+                <span>미리보기</span>
+              </div>
+              <div className="ext-form">
+                <div className="input-group">
+                  <label>상품명</label>
+                  <input 
+                    type="text" 
+                    value={extractedData.name} 
+                    onChange={(e) => setExtractedData({...extractedData, name: e.target.value})}
+                  />
+                </div>
+                <div className="input-group">
+                  <label>가격</label>
+                  <input 
+                    type="text" 
+                    value={extractedData.price} 
+                    onChange={(e) => setExtractedData({...extractedData, price: e.target.value})}
+                  />
+                </div>
+                <div className="input-group">
+                  <label>카테고리</label>
+                  <select 
+                    value={extractedData.category} 
+                    onChange={(e) => setExtractedData({...extractedData, category: e.target.value})}
+                  >
+                    {categories.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
+                  </select>
+                </div>
                 <button className="add-to-sheet-btn" onClick={handleAddToSheet} disabled={adding}>
-                  {adding ? '🔄 등록 중...' : '✅ 구글 시트에 즉시 등록'}
+                  {adding ? '🔄 시트 등록 중...' : '🚀 이대로 구글 시트에 등록'}
                 </button>
               </div>
             </div>
