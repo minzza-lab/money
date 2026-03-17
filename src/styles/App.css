@@ -21,17 +21,139 @@ body {
   line-height: 1.6;
 }
 
+/* 전역 설정 보완 */
+html, body {
+  overflow-x: hidden; /* 가로 스크롤 방지 */
+}
+
 .app-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding-bottom: 50px;
+  padding: 0 15px 50px 15px; /* 양옆 여백 추가 */
+}
+
+/* 히어로 섹션 모바일 최적화 */
+.hero-section {
+  padding: 40px 15px;
+  margin-bottom: 20px;
+}
+
+.main-title {
+  font-size: 2rem; /* 폰트 크기 축소 */
+}
+
+/* 검색창 모바일 최적화 */
+.search-box {
+  width: 100%;
+  padding: 0 10px;
+}
+
+/* 카테고리 바 스크롤 개선 */
+.category-bar {
+  padding: 10px 0;
+  margin-bottom: 20px;
+  scrollbar-width: none; /* 파이어폭스 스크롤바 제거 */
+}
+
+.category-bar::-webkit-scrollbar {
+  display: none; /* 크롬 스크롤바 제거 */
+}
+
+/* 상품 그리드: 모바일에서는 2열이 국룰 */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2줄로 표시 */
+  gap: 12px; /* 간격 축소 */
+  padding: 0;
+}
+
+.product-card {
+  border-radius: 12px;
+}
+
+.image-container {
+  height: 160px; /* 이미지 높이 조절 */
+}
+
+.info-container {
+  padding: 12px;
+}
+
+.product-name {
+  font-size: 0.9rem;
+  height: 2.8em;
+  margin-bottom: 8px;
+}
+
+.product-price {
+  font-size: 1.1rem;
+}
+
+.card-footer {
+  flex-direction: column; /* 세로로 배치 */
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.buy-btn-small {
+  width: 100%;
+  text-align: center;
+  padding: 8px 0;
+}
+
+/* 모달 모바일 최적화 */
+.modal-content {
+  width: 95%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-body {
+  padding: 0;
+}
+
+.modal-image {
+  height: 250px;
+}
+
+.modal-info {
+  padding: 20px;
+}
+
+/* 태블릿 이상 환경 (화면이 넓어지면 다시 3~4열로) */
+@media (min-width: 768px) {
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 25px;
+  }
+  
+  .main-title {
+    font-size: 2.8rem;
+  }
+  
+  .image-container {
+    height: 220px;
+  }
+  
+  .modal-image {
+    height: 400px;
+  }
+}
+
+/* 관리자 패널 모바일 최적화 */
+.admin-extractor {
+  flex-direction: column;
+}
+
+.admin-extractor button {
+  padding: 12px;
 }
 
 /* 관리자 배너 V2 */
 .admin-banner-v2 {
   background: #1a1a1a;
   color: white;
-  padding: 20px;
+  padding: 15px;
   position: sticky;
   top: 0;
   z-index: 1500;
@@ -43,65 +165,56 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 
 .admin-links {
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
 .admin-links a, .logout-btn {
   background: #333;
   color: white;
   text-decoration: none;
-  padding: 5px 15px;
+  padding: 5px 10px;
   border-radius: 5px;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   border: 1px solid #444;
-  cursor: pointer;
-}
-
-.logout-btn {
-  background: #c0392b;
-  border: none;
 }
 
 .admin-extractor {
   display: flex;
+  flex-direction: column;
   gap: 10px;
 }
 
-.admin-extractor input {
-  flex: 1;
+.admin-extractor textarea {
   background: #222;
   border: 1px solid #444;
   color: white;
-  padding: 10px 15px;
+  padding: 10px;
   border-radius: 8px;
+  font-size: 0.85rem;
+  width: 100%;
 }
 
 .admin-extractor button {
   background: #3498db;
   color: white;
   border: none;
-  padding: 0 20px;
+  padding: 12px;
   border-radius: 8px;
-  cursor: pointer;
   font-weight: bold;
-}
-
-.admin-extractor button:disabled {
-  background: #555;
-  cursor: not-allowed;
+  cursor: pointer;
 }
 
 /* 프로그레스 바 스타일 */
 .progress-container {
-  margin-top: 15px;
+  margin-top: 10px;
   background: #333;
   border-radius: 10px;
-  height: 25px;
+  height: 20px;
   position: relative;
   overflow: hidden;
 }
@@ -117,44 +230,25 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: bold;
   color: white;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 
 .extracted-preview {
-  margin-top: 15px;
+  margin-top: 10px;
   background: #222;
-  padding: 15px;
+  padding: 10px;
   border-radius: 10px;
   display: flex;
-  gap: 15px;
+  gap: 10px;
   align-items: center;
-  animation: fadeIn 0.3s;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 .extracted-preview img {
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   object-fit: cover;
-  border-radius: 5px;
-}
-
-.ext-info p {
-  font-size: 0.85rem;
-  margin-bottom: 3px;
-}
-
-.ext-info .hint {
-  color: #f1c40f;
-  font-weight: bold;
-  margin-top: 5px;
 }
 
 .add-to-sheet-btn {
@@ -162,22 +256,10 @@ body {
   background: #2ecc71;
   color: white;
   border: none;
-  padding: 8px 15px;
+  padding: 10px;
   border-radius: 5px;
   font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s;
   width: 100%;
-}
-
-.add-to-sheet-btn:hover {
-  background: #27ae60;
-  transform: scale(1.02);
-}
-
-.add-to-sheet-btn:disabled {
-  background: #7f8c8d;
-  cursor: not-allowed;
 }
 
 /* 티커 */
