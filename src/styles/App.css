@@ -157,6 +157,29 @@ body {
   margin-top: 5px;
 }
 
+.add-to-sheet-btn {
+  margin-top: 10px;
+  background: #2ecc71;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.add-to-sheet-btn:hover {
+  background: #27ae60;
+  transform: scale(1.02);
+}
+
+.add-to-sheet-btn:disabled {
+  background: #7f8c8d;
+  cursor: not-allowed;
+}
+
 /* 티커 */
 .ticker {
   background: linear-gradient(90deg, #e74c3c, #f39c12);

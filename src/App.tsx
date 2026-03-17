@@ -14,6 +14,7 @@ interface Product {
 }
 
 const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR_nOqXyVAPTZiMbxtilRQnFBZjkUGL3oz0twTEsNEskU6lxhkW7M3JDwVwHys8Ayty5-x0UlJ2YH3L/pub?gid=0&single=true&output=csv';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzbpON0RYiDePaSBgQ_29DWztcDV1xJ2U1hbETM1uNDFAT1lMh34wOcmRG3m3U-AII/exec';
 const ADMIN_PASSWORD = '5365';
 
 const App: React.FC = () => {
@@ -27,11 +28,41 @@ const App: React.FC = () => {
   const [showLogin, setShowLogin] = useState<boolean>(false);
   const [passwordInput, setPasswordInput] = useState<string>('');
 
-  // 추출기 관련 상태
+  // 추출 및 추가 관련 상태
   const [coupangUrl, setCoupangUrl] = useState<string>('');
   const [extracting, setExtracting] = useState<boolean>(false);
+  const [adding, setAdding] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
   const [extractedData, setExtractedData] = useState<Partial<Product> | null>(null);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch(SHEET_URL);
+      const data = await response.text();
+      const rows = data.split('\n').slice(1);
+      const parsedData = rows.map((row, index) => {
+        const columns = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+        if (!columns || columns.length < 5) return null;
+        const clean = (val: string) => val.replace(/^"|"$/g, '').trim();
+        return {
+          id: index + 1,
+          name: clean(columns[1]),
+          price: clean(columns[2]),
+          image: clean(columns[3]),
+          link: clean(columns[4]),
+          category: clean(columns[5] || '기타'),
+          isRocket: clean(columns[6]).toUpperCase() === 'TRUE',
+          badge: clean(columns[7] || ''),
+          discountRate: clean(columns[8] || '')
+        };
+      }).filter(item => item !== null) as Product[];
+      setProducts(parsedData);
+      setLoading(false);
+    } catch (error) {
+      console.error('데이터를 불러오는데 실패했습니다:', error);
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -40,36 +71,6 @@ const App: React.FC = () => {
       }
     };
     window.addEventListener('keydown', handleKeyDown);
-
-    const fetchProducts = async () => {
-      try {
-        const response = await fetch(SHEET_URL);
-        const data = await response.text();
-        const rows = data.split('\n').slice(1);
-        const parsedData = rows.map((row, index) => {
-          const columns = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-          if (!columns || columns.length < 5) return null;
-          const clean = (val: string) => val.replace(/^"|"$/g, '').trim();
-          return {
-            id: index + 1,
-            name: clean(columns[1]),
-            price: clean(columns[2]),
-            image: clean(columns[3]),
-            link: clean(columns[4]),
-            category: clean(columns[5] || '기타'),
-            isRocket: clean(columns[6]).toUpperCase() === 'TRUE',
-            badge: clean(columns[7] || ''),
-            discountRate: clean(columns[8] || '')
-          };
-        }).filter(item => item !== null) as Product[];
-        setProducts(parsedData);
-        setLoading(false);
-      } catch (error) {
-        console.error('데이터를 불러오는데 실패했습니다:', error);
-        setLoading(false);
-      }
-    };
-
     fetchProducts();
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
@@ -84,20 +85,14 @@ const App: React.FC = () => {
     }
   };
 
-  // 쿠팡 정보 추출 함수
   const handleExtract = async () => {
     if (!coupangUrl) return alert('쿠팡 링크를 입력해주세요!');
     setExtracting(true);
     setExtractedData(null);
     setProgress(0);
 
-    // 가짜 진행률 애니메이션 (95%까지 서서히 상승)
     const timer = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 95) return prev;
-        const diff = Math.random() * 10; 
-        return Math.min(prev + diff, 95);
-      });
+      setProgress(prev => (prev >= 95 ? prev : prev + Math.random() * 10));
     }, 300);
 
     try {
@@ -106,29 +101,47 @@ const App: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: coupangUrl })
       });
-      
-      if (!response.ok) throw new Error('Fetch failed');
-      
       const data = await response.json();
-      
-      // 완료 시 100%로 점프
       setProgress(100);
-      
       setTimeout(() => {
         setExtractedData({
           name: data.title,
           price: data.price,
           image: data.image,
-          link: coupangUrl
+          link: coupangUrl,
+          category: '전체'
         });
         setExtracting(false);
       }, 500);
-
     } catch (error) {
-      alert('정보를 가져오는데 실패했습니다. (로컬 환경에서는 작동하지 않을 수 있습니다)');
+      alert('정보 추출 실패');
       setExtracting(false);
     } finally {
       clearInterval(timer);
+    }
+  };
+
+  const handleAddToSheet = async () => {
+    if (!extractedData) return;
+    setAdding(true);
+
+    try {
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(extractedData)
+      });
+      
+      alert('✅ 구글 시트에 상품이 추가되었습니다!');
+      setExtractedData(null);
+      setCoupangUrl('');
+      // 데이터 새로고침
+      setTimeout(fetchProducts, 3000);
+    } catch (error) {
+      alert('시트 추가 중 오류 발생');
+    } finally {
+      setAdding(false);
     }
   };
 
@@ -155,23 +168,15 @@ const App: React.FC = () => {
           <div className="admin-top">
             <span>🛡️ 관리자 모드</span>
             <div className="admin-links">
-              <a href="https://docs.google.com/spreadsheets/d/1wGES7Bu8zvHLaUdND-7E197f6FlUy9WmpcHVdNWWcII/edit" target="_blank" rel="noreferrer">📊 시트</a>
+              <a href="https://docs.google.com/spreadsheets/d/1wGES7Bu8zvHLaUdND-7E197f6FlUy9WmpcHVdNWWcII/edit" target="_blank" rel="noreferrer">📊 시트 열기</a>
               <button onClick={() => setIsAdmin(false)} className="logout-btn">나가기</button>
             </div>
           </div>
           <div className="admin-extractor">
-            <input 
-              type="text" 
-              placeholder="쿠팡 상품 링크를 입력하세요" 
-              value={coupangUrl}
-              onChange={(e) => setCoupangUrl(e.target.value)}
-            />
-            <button onClick={handleExtract} disabled={extracting}>
-              {extracting ? '⏳ 분석 중...' : '⚡ 정보 추출'}
-            </button>
+            <input type="text" placeholder="쿠팡 상품 링크 입력" value={coupangUrl} onChange={(e) => setCoupangUrl(e.target.value)} />
+            <button onClick={handleExtract} disabled={extracting}>{extracting ? '⏳ 분석 중...' : '⚡ 정보 추출'}</button>
           </div>
           
-          {/* 프로그레스 바 추가 */}
           {extracting && (
             <div className="progress-container">
               <div className="progress-bar" style={{ width: `${progress}%` }}></div>
@@ -185,7 +190,9 @@ const App: React.FC = () => {
               <div className="ext-info">
                 <p><strong>명칭:</strong> {extractedData.name}</p>
                 <p><strong>가격:</strong> {extractedData.price}</p>
-                <p className="hint">💡 위 정보를 복사하여 구글 시트에 붙여넣으세요!</p>
+                <button className="add-to-sheet-btn" onClick={handleAddToSheet} disabled={adding}>
+                  {adding ? '🔄 등록 중...' : '✅ 이 상품을 구글 시트에 즉시 등록'}
+                </button>
               </div>
             </div>
           )}
