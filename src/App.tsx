@@ -37,7 +37,6 @@ const App: React.FC = () => {
 
   const fetchProducts = async () => {
     try {
-      // 캐시 방지를 위해 주소 뒤에 랜덤한 번호를 붙입니다 (t=시간값)
       const cacheBuster = `&t=${new Date().getTime()}`;
       const response = await fetch(SHEET_URL + cacheBuster);
       const data = await response.text();
@@ -61,7 +60,7 @@ const App: React.FC = () => {
       setProducts(parsedData);
       setLoading(false);
     } catch (error) {
-      console.error('데이터를 불러오는데 실패했습니다:', error);
+      console.error('데이터 로딩 실패:', error);
       setLoading(false);
     }
   };
@@ -87,10 +86,8 @@ const App: React.FC = () => {
     }
   };
 
-  // 정보 추출 및 파싱 함수
   const handleExtract = async () => {
     if (!coupangUrl) return alert('링크 또는 코드를 입력해주세요!');
-    
     setExtracting(true);
     setExtractedData(null);
     setProgress(0);
@@ -99,22 +96,16 @@ const App: React.FC = () => {
     let initialTitle = '';
     let initialImage = '';
 
-    // 1. HTML 코드인 경우 1차 파싱 (링크/이미지/상품명 추출)
     if (coupangUrl.includes('<')) {
       setProgress(30);
       const hrefMatch = coupangUrl.match(/href="(.*?)"/);
       const srcMatch = coupangUrl.match(/src="(.*?)"/);
       const altMatch = coupangUrl.match(/alt="(.*?)"/);
-      const iframeSrcMatch = coupangUrl.match(/src="(.*?)"/);
-
       if (hrefMatch) finalLink = hrefMatch[1];
-      else if (iframeSrcMatch) finalLink = iframeSrcMatch[1];
-      
       if (srcMatch) initialImage = srcMatch[1];
       if (altMatch) initialTitle = altMatch[1];
     }
 
-    // 2. 서버를 통해 상세 정보(특히 가격) 한 번 더 조회
     const timer = setInterval(() => {
       setProgress(prev => (prev >= 90 ? prev : prev + Math.random() * 5));
     }, 300);
@@ -126,63 +117,47 @@ const App: React.FC = () => {
         body: JSON.stringify({ url: finalLink })
       });
       const data = await response.json();
-      
       setProgress(100);
       setTimeout(() => {
         setExtractedData({
-          name: data.title !== '상품명을 찾을 수 없습니다' ? data.title : (initialTitle || '쿠팡 상품'),
-          price: data.price || '가격 확인 필요',
-          image: data.image || initialImage || 'https://via.placeholder.com/150',
+          name: data.title !== '상품명을 찾을 수 없습니다' ? data.title : initialTitle,
+          price: data.price,
+          image: data.image || initialImage,
           link: finalLink,
-          category: '전체'
+          category: '기타'
         });
         setExtracting(false);
       }, 500);
     } catch (error) {
-      // 서버 추출 실패 시 1차 파싱 정보라도 보여줌
-      setExtractedData({
-        name: initialTitle || '쿠팡 상품',
-        price: '가격 확인 필요',
-        image: initialImage || 'https://via.placeholder.com/150',
-        link: finalLink,
-        category: '전체'
-      });
+      alert('추출 실패');
       setExtracting(false);
     } finally {
       clearInterval(timer);
     }
   };
 
-  // 구글 시트에 자동 추가 함수 (즉시 갱신 로직 추가)
   const handleAddToSheet = async () => {
     if (!extractedData) return;
     setAdding(true);
-
     try {
-      // 데이터 전송 시 특수문자 처리를 위해 안전하게 구성
       const safeData = {
         ...extractedData,
-        name: extractedData.name?.replace(/,/g, ' '), // 이름에서 쉼표 제거 (CSV 오류 방지)
+        name: extractedData.name?.replace(/,/g, ' '),
         image: extractedData.image?.trim(),
         link: extractedData.link?.trim()
       };
-
       await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(safeData)
       });
-      
-      alert('✅ 시트에 등록되었습니다! 잠시 후 화면이 갱신됩니다.');
+      alert('✅ 시트에 등록되었습니다!');
       setExtractedData(null);
       setCoupangUrl('');
-      
-      // 즉시 데이터 새로고침 (여러 번 시도하여 시트 반영 대기)
       setTimeout(fetchProducts, 3000);
-      setTimeout(fetchProducts, 6000);
     } catch (error) {
-      alert('시트 추가 중 오류 발생');
+      alert('등록 오류');
     } finally {
       setAdding(false);
     }
@@ -190,10 +165,11 @@ const App: React.FC = () => {
 
   const categories = [
     { name: '전체', icon: '🏠' },
-    { name: '무거운 생필품', icon: '📦' },
-    { name: '가전디지털', icon: '💻' },
-    { name: '주방용품', icon: '🍳' },
-    { name: '간편식품', icon: '🍜' }
+    { name: '생수', icon: '💧' },
+    { name: '콜라/음료', icon: '🥤' },
+    { name: '식품', icon: ' Ramen' },
+    { name: '전자제품', icon: '💻' },
+    { name: '기타', icon: '📦' }
   ];
 
   const filteredProducts = products.filter(p => {
@@ -202,71 +178,32 @@ const App: React.FC = () => {
     return matchesCategory && matchesSearch;
   });
 
-  if (loading) return <div className="loading-screen"><div className="loader"></div><p>상품 정보를 불러오는 중입니다...</p></div>;
+  if (loading) return <div className="loading-screen"><div className="loader"></div><p>데이터 로딩 중...</p></div>;
 
   return (
     <div className="app-container">
       {isAdmin && (
         <div className="admin-banner-v2">
           <div className="admin-top">
-            <span>🛡️ 관리자 모드</span>
+            <span>🛡️ 관리자</span>
             <div className="admin-links">
-              <a href="https://docs.google.com/spreadsheets/d/1wGES7Bu8zvHLaUdND-7E197f6FlUy9WmpcHVdNWWcII/edit" target="_blank" rel="noreferrer">📊 시트 열기</a>
+              <a href="https://docs.google.com/spreadsheets/d/1wGES7Bu8zvHLaUdND-7E197f6FlUy9WmpcHVdNWWcII/edit" target="_blank" rel="noreferrer">📊 시트</a>
               <button onClick={() => setIsAdmin(false)} className="logout-btn">나가기</button>
             </div>
           </div>
           <div className="admin-extractor">
-            <textarea 
-              placeholder="쿠팡 링크 또는 HTML 코드를 붙여넣으세요" 
-              value={coupangUrl} 
-              onChange={(e) => setCoupangUrl(e.target.value)}
-              rows={3}
-            />
-            <button onClick={handleExtract} disabled={extracting}>{extracting ? '⏳ 분석 중...' : '⚡ 분석 및 추출'}</button>
+            <textarea placeholder="쿠팡 링크 또는 코드 붙여넣기" value={coupangUrl} onChange={(e) => setCoupangUrl(e.target.value)} rows={2} />
+            <button onClick={handleExtract} disabled={extracting}>{extracting ? '⏳ 추출 중...' : '⚡ 정보 추출'}</button>
           </div>
-          
-          {extracting && (
-            <div className="progress-container">
-              <div className="progress-bar" style={{ width: `${progress}%` }}></div>
-              <span className="progress-text">{Math.round(progress)}% 진행 중...</span>
-            </div>
-          )}
-
+          {extracting && <div className="progress-container"><div className="progress-bar" style={{ width: `${progress}%` }}></div><span className="progress-text">{Math.round(progress)}%</span></div>}
           {extractedData && (
             <div className="extracted-preview-v2">
-              <div className="ext-top">
-                <img src={extractedData.image} alt="preview" />
-                <span>미리보기</span>
-              </div>
+              <div className="ext-top"><img src={extractedData.image} alt="p" /><span>정보 수정 후 등록</span></div>
               <div className="ext-form">
-                <div className="input-group">
-                  <label>상품명</label>
-                  <input 
-                    type="text" 
-                    value={extractedData.name} 
-                    onChange={(e) => setExtractedData({...extractedData, name: e.target.value})}
-                  />
-                </div>
-                <div className="input-group">
-                  <label>가격</label>
-                  <input 
-                    type="text" 
-                    value={extractedData.price} 
-                    onChange={(e) => setExtractedData({...extractedData, price: e.target.value})}
-                  />
-                </div>
-                <div className="input-group">
-                  <label>카테고리</label>
-                  <select 
-                    value={extractedData.category} 
-                    onChange={(e) => setExtractedData({...extractedData, category: e.target.value})}
-                  >
-                    {categories.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
-                  </select>
-                </div>
-                <button className="add-to-sheet-btn" onClick={handleAddToSheet} disabled={adding}>
-                  {adding ? '🔄 시트 등록 중...' : '🚀 이대로 구글 시트에 등록'}
-                </button>
+                <div className="input-group"><label>상품명</label><input type="text" value={extractedData.name} onChange={(e) => setExtractedData({...extractedData, name: e.target.value})} /></div>
+                <div className="input-group"><label>가격</label><input type="text" value={extractedData.price} onChange={(e) => setExtractedData({...extractedData, price: e.target.value})} /></div>
+                <div className="input-group"><label>카테고리</label><select value={extractedData.category} onChange={(e) => setExtractedData({...extractedData, category: e.target.value})}>{categories.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}</select></div>
+                <button className="add-to-sheet-btn" onClick={handleAddToSheet} disabled={adding}>{adding ? '등록 중...' : '🚀 구글 시트 등록'}</button>
               </div>
             </div>
           )}
@@ -277,11 +214,8 @@ const App: React.FC = () => {
         <div className="modal-overlay">
           <div className="login-modal">
             <h3>관리자 인증</h3>
-            <input type="password" placeholder="비밀번호 입력" value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleLogin()} />
-            <div className="login-btns">
-              <button onClick={handleLogin}>확인</button>
-              <button onClick={() => setShowLogin(false)} className="cancel">취소</button>
-            </div>
+            <input type="password" placeholder="비밀번호" value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleLogin()} />
+            <div className="login-btns"><button onClick={handleLogin}>확인</button><button onClick={() => setShowLogin(false)} className="cancel">취소</button></div>
           </div>
         </div>
       )}
@@ -289,14 +223,8 @@ const App: React.FC = () => {
       <div className="ticker"><div className="ticker-content">🔥 실시간 급상승! 🚀 마트보다 저렴한 생필품 모음전! 🔥</div></div>
 
       <header className="hero-section">
-        <div className="hero-content">
-          <h1 className="main-title">쿠팡 큐레이터 <span>MONEY</span> 🛒</h1>
-          <p className="sub-title">"가성비 끝판왕" 쇼핑 정보만 엄선했습니다.</p>
-        </div>
-        <div className="search-box">
-          <input type="text" placeholder="찾으시는 상품이 있나요?" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-          <button className="search-btn">🔍</button>
-        </div>
+        <h1 className="main-title">MONEY <span>큐레이션</span> 🛒</h1>
+        <div className="search-box"><input type="text" placeholder="상품 검색..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} /></div>
       </header>
 
       <nav className="category-bar">
@@ -312,20 +240,11 @@ const App: React.FC = () => {
         {filteredProducts.map((product: Product) => (
           <div key={product.id} className="product-card" onClick={() => setSelectedProduct(product)}>
             {product.badge && <div className="badge">{product.badge}</div>}
-            <div className="image-container">
-              <img src={product.image} alt={product.name} className="product-image" />
-              {product.isRocket && <div className="rocket-icon">🚀</div>}
-            </div>
+            <div className="image-container"><img src={product.image} alt={product.name} className="product-image" />{product.isRocket && <div className="rocket-icon">🚀</div>}</div>
             <div className="info-container">
               <h3 className="product-name">{product.name}</h3>
-              <div className="price-info">
-                {product.discountRate && <span className="discount">{product.discountRate}</span>}
-                <p className="product-price">{product.price}</p>
-              </div>
-              <div className="card-footer">
-                <span className="category-tag">{product.category}</span>
-                <button className="buy-btn-small">상세보기</button>
-              </div>
+              <p className="product-price">{product.price}</p>
+              <div className="category-tag">{product.category}</div>
             </div>
           </div>
         ))}
@@ -334,32 +253,18 @@ const App: React.FC = () => {
       {selectedProduct && (
         <div className="modal-overlay" onClick={() => setSelectedProduct(null)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <button className="close-btn" onClick={() => setSelectedProduct(null)}>×</button>
-            <div className="modal-body">
-              <img src={selectedProduct.image} alt={selectedProduct.name} className="modal-image" />
-              <div className="modal-info">
-                <h2>{selectedProduct.name}</h2>
-                <div className="modal-price">{selectedProduct.price}</div>
-                <div className="modal-desc">
-                  <p>✅ 로켓배송 가능 상품</p>
-                  <p>✅ 무료 반품 가능</p>
-                  <p>✅ 쿠팡 최저가 보장</p>
-                </div>
-                <a href={selectedProduct.link} target="_blank" rel="noopener noreferrer" className="modal-buy-btn">쿠팡에서 최저가로 구매하기</a>
-              </div>
+            <img src={selectedProduct.image} alt="p" className="modal-image" />
+            <div className="modal-info">
+              <h2>{selectedProduct.name}</h2>
+              <div className="modal-price">{selectedProduct.price}</div>
+              <a href={selectedProduct.link} target="_blank" rel="noopener noreferrer" className="modal-buy-btn">쿠팡에서 구매하기</a>
             </div>
           </div>
         </div>
       )}
 
-      <footer className="footer"><div className="footer-notice"><p>이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p><p>© 2026 머니 랩 쿠팡 프로젝트. 모든 권리 보유.</p></div></footer>
-
-      {/* 관리자 진입 플로팅 버튼 */}
-      {!isAdmin && (
-        <button className="admin-floating-btn" onClick={() => setShowLogin(true)}>
-          ⚙️
-        </button>
-      )}
+      <footer className="footer"><p>이 포스팅은 쿠팡 파트너스 활동의 일환으로, 일정액의 수수료를 제공받습니다.</p><p>© 2026 MONEY LAB. All Rights Reserved.</p></footer>
+      {!isAdmin && <button className="admin-floating-btn" onClick={() => setShowLogin(true)}>⚙️</button>}
     </div>
   );
 };
