@@ -31,13 +31,14 @@
   },
   {
     "id": 4,
-    "name": "쿠쿠 압력밥솥 6인용",
-    "price": "158,000원",
+    "name": "쿠쿠 트윈프레셔 6인용 마스터셰프 CRP-LHTR0610FW",
+    "price": "458,000원",
     "image": "https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?w=800&auto=format&fit=crop",
-    "link": "https://link.coupang.com/a/your-id",
+    "link": "https://www.coupang.com/vp/products/6487210688",
     "category": "가전디지털",
     "isRocket": true,
-    "badge": "최저가"
+    "badge": "프리미엄",
+    "discountRate": "15%"
   },
   {
     "id": 5,
