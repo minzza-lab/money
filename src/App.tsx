@@ -101,7 +101,15 @@ const App: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: coupangUrl })
       });
+
       const data = await response.json();
+
+      if (data.title === '상품명을 찾을 수 없습니다' || !data.image) {
+        alert('쿠팡 보안 정책으로 인해 정보를 가져오지 못했습니다. 잠시 후 다시 시도하거나, 상품 정보를 직접 시트에 입력해 주세요.');
+        setExtracting(false);
+        return;
+      }
+
       setProgress(100);
       setTimeout(() => {
         setExtractedData({
@@ -114,9 +122,10 @@ const App: React.FC = () => {
         setExtracting(false);
       }, 500);
     } catch (error) {
-      alert('정보 추출 실패');
+      alert('서버 연결 오류가 발생했습니다. 실제 배포된 사이트에서 테스트해 주세요!');
       setExtracting(false);
-    } finally {
+    }
+ finally {
       clearInterval(timer);
     }
   };
