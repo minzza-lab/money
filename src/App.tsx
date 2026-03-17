@@ -159,11 +159,19 @@ const App: React.FC = () => {
     setAdding(true);
 
     try {
+      // 데이터 전송 시 특수문자 처리를 위해 안전하게 구성
+      const safeData = {
+        ...extractedData,
+        name: extractedData.name?.replace(/,/g, ' '), // 이름에서 쉼표 제거 (CSV 오류 방지)
+        image: extractedData.image?.trim(),
+        link: extractedData.link?.trim()
+      };
+
       await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(extractedData)
+        body: JSON.stringify(safeData)
       });
       
       alert('✅ 시트에 등록되었습니다! 잠시 후 화면이 갱신됩니다.');
