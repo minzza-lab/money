@@ -30,6 +30,7 @@ const App: React.FC = () => {
   // 추출기 관련 상태
   const [coupangUrl, setCoupangUrl] = useState<string>('');
   const [extracting, setExtracting] = useState<boolean>(false);
+  const [progress, setProgress] = useState<number>(0);
   const [extractedData, setExtractedData] = useState<Partial<Product> | null>(null);
 
   useEffect(() => {
@@ -88,6 +89,16 @@ const App: React.FC = () => {
     if (!coupangUrl) return alert('쿠팡 링크를 입력해주세요!');
     setExtracting(true);
     setExtractedData(null);
+    setProgress(0);
+
+    // 가짜 진행률 애니메이션 (95%까지 서서히 상승)
+    const timer = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 95) return prev;
+        const diff = Math.random() * 10; 
+        return Math.min(prev + diff, 95);
+      });
+    }, 300);
 
     try {
       const response = await fetch('/api/extract', {
@@ -95,17 +106,29 @@ const App: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: coupangUrl })
       });
+      
+      if (!response.ok) throw new Error('Fetch failed');
+      
       const data = await response.json();
-      setExtractedData({
-        name: data.title,
-        price: data.price,
-        image: data.image,
-        link: coupangUrl
-      });
+      
+      // 완료 시 100%로 점프
+      setProgress(100);
+      
+      setTimeout(() => {
+        setExtractedData({
+          name: data.title,
+          price: data.price,
+          image: data.image,
+          link: coupangUrl
+        });
+        setExtracting(false);
+      }, 500);
+
     } catch (error) {
       alert('정보를 가져오는데 실패했습니다. (로컬 환경에서는 작동하지 않을 수 있습니다)');
-    } finally {
       setExtracting(false);
+    } finally {
+      clearInterval(timer);
     }
   };
 
@@ -144,9 +167,18 @@ const App: React.FC = () => {
               onChange={(e) => setCoupangUrl(e.target.value)}
             />
             <button onClick={handleExtract} disabled={extracting}>
-              {extracting ? '⏳ 추출 중...' : '⚡ 정보 추출'}
+              {extracting ? '⏳ 분석 중...' : '⚡ 정보 추출'}
             </button>
           </div>
+          
+          {/* 프로그레스 바 추가 */}
+          {extracting && (
+            <div className="progress-container">
+              <div className="progress-bar" style={{ width: `${progress}%` }}></div>
+              <span className="progress-text">{Math.round(progress)}% 분석 중...</span>
+            </div>
+          )}
+
           {extractedData && (
             <div className="extracted-preview">
               <img src={extractedData.image} alt="preview" />

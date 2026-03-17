@@ -96,6 +96,33 @@ body {
   cursor: not-allowed;
 }
 
+/* 프로그레스 바 스타일 */
+.progress-container {
+  margin-top: 15px;
+  background: #333;
+  border-radius: 10px;
+  height: 25px;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar {
+  background: linear-gradient(90deg, #3498db, #2ecc71);
+  height: 100%;
+  transition: width 0.3s ease-out;
+}
+
+.progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
 .extracted-preview {
   margin-top: 15px;
   background: #222;
