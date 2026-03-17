@@ -29,7 +29,7 @@ body {
 html, body {
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden; /* 가로 스크롤 원천 차단 */
+  overflow-x: hidden;
   margin: 0;
   padding: 0;
 }
@@ -37,53 +37,12 @@ html, body {
 /* 앱 컨테이너 */
 .app-container {
   width: 100%;
-  max-width: 600px; /* PC에서도 너무 넓지 않게 */
+  max-width: 600px;
   margin: 0 auto;
   min-height: 100vh;
   background: var(--bg);
   position: relative;
-  overflow-x: hidden; /* 한 번 더 차단 */
-}
-
-/* 상품 리스트 (2열 고정 및 너비 정밀 계산) */
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr)); /* 너비가 넘치지 않게 0에서 시작 */
-  gap: 10px;
-  padding: 10px; /* 내부 여백 */
-  width: 100%;
-}
-
-.product-card {
-  background: var(--card);
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: var(--shadow);
-  display: flex;
-  flex-direction: column;
-  width: 100%; /* 부모 그리드에 딱 맞게 */
-}
-
-/* 히어로 섹션 */
-.hero-section {
-  width: 100%;
-  padding: 25px 15px;
-  background: #fff;
-  border-bottom-left-radius: 25px;
-  border-bottom-right-radius: 25px;
-  box-shadow: var(--shadow);
-  margin-bottom: 10px;
-}
-
-/* 상세 모달 크기 최적화 */
-.modal-content {
-  background: #fff;
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-  border-top-left-radius: 25px;
-  border-top-right-radius: 25px;
-  padding-bottom: env(safe-area-inset-bottom); /* 아이폰 하단 홈바 대응 */
+  overflow-x: hidden;
 }
 
 /* 상단 티커 */
@@ -108,6 +67,17 @@ html, body {
 @keyframes ticker {
   0% { transform: translate3d(0, 0, 0); }
   100% { transform: translate3d(-100%, 0, 0); }
+}
+
+/* 히어로 섹션 */
+.hero-section {
+  width: 100%;
+  padding: 25px 15px;
+  background: #fff;
+  border-bottom-left-radius: 25px;
+  border-bottom-right-radius: 25px;
+  box-shadow: var(--shadow);
+  margin-bottom: 10px;
 }
 
 .main-title {
@@ -171,9 +141,28 @@ html, body {
   border-color: var(--text-main);
 }
 
+/* 상품 리스트 (2열 고정) */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 10px;
+  width: 100%;
+}
+
+.product-card {
+  background: var(--card);
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
 .image-container {
   width: 100%;
-  padding-top: 100%; /* 1:1 비율 */
+  padding-top: 100%;
   position: relative;
   background: #fff;
 }
@@ -241,17 +230,7 @@ html, body {
   color: var(--coupang);
 }
 
-.discount {
-  font-size: 0.75rem;
-  color: var(--coupang);
-  margin-right: 5px;
-}
-
-.buy-btn-small {
-  display: none; /* 카드에서 버튼 제거하고 클릭 시 상세페이지로 유도 */
-}
-
-/* 상세 모달 (풀스크린 스타일) */
+/* 상세 모달 */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -261,7 +240,13 @@ html, body {
   background: rgba(0,0,0,0.8);
   z-index: 3000;
   display: flex;
-  align-items: flex-end; /* 아래에서 위로 올라오는 스타일 */
+  align-items: center;
+  justify-content: center;
+}
+
+/* 상세 보기 모달 (아래에서 위로) */
+.product-grid + .modal-overlay {
+  align-items: flex-end;
 }
 
 .modal-content {
@@ -272,6 +257,7 @@ html, body {
   border-top-left-radius: 25px;
   border-top-right-radius: 25px;
   animation: slideUp 0.3s ease-out;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 @keyframes slideUp {
@@ -279,42 +265,68 @@ html, body {
   to { transform: translateY(0); }
 }
 
-.modal-image {
-  width: 100%;
-  height: 300px;
-  object-fit: contain;
-  background: #fff;
-}
-
-.modal-info {
-  padding: 25px;
-}
-
-.modal-info h2 {
-  font-size: 1.2rem;
-  margin-bottom: 10px;
-}
-
-.modal-price {
-  font-size: 1.8rem;
-  font-weight: 900;
-  color: var(--coupang);
-  margin-bottom: 20px;
-}
-
-.modal-buy-btn {
-  background: var(--coupang);
-  color: #fff;
-  text-decoration: none;
-  display: block;
+/* 관리자 로그인 모달 (중앙 정렬 전용) */
+.login-modal {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 320px;
   text-align: center;
-  padding: 18px;
-  border-radius: 15px;
-  font-weight: 900;
-  font-size: 1.1rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  animation: modalIn 0.3s;
 }
 
-/* 관리자 모드 V2 (최신 스타일 유지) */
+@keyframes modalIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.login-modal input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  margin: 20px 0;
+  font-size: 1rem;
+}
+
+.login-btns {
+  display: flex;
+  gap: 10px;
+}
+
+.login-btns button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.login-btns button:first-child { background: var(--primary); color: white; }
+.login-btns button.cancel { background: #eee; }
+
+/* 관리자 플로팅 버튼 */
+.admin-floating-btn {
+  position: fixed;
+  bottom: 25px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  background: rgba(0,0,0,0.05);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  z-index: 1000;
+  cursor: pointer;
+}
+
+/* 관리자 대시보드 V2 */
 .admin-banner-v2 {
   background: #1a1a1a;
   color: white;
@@ -324,16 +336,6 @@ html, body {
   z-index: 1500;
 }
 
-.admin-extractor textarea {
-  width: 100%;
-  background: #333;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  padding: 10px;
-}
-
-/* 관리자 추출기 추가 스타일 */
 .admin-top {
   display: flex;
   justify-content: space-between;
@@ -350,6 +352,16 @@ html, body {
   font-size: 0.7rem;
 }
 
+.admin-extractor textarea {
+  width: 100%;
+  background: #333;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 0.85rem;
+}
+
 .admin-extractor button {
   width: 100%;
   margin-top: 10px;
@@ -361,6 +373,7 @@ html, body {
   font-weight: bold;
 }
 
+/* 추출기 프로그레스 바 */
 .progress-container {
   margin-top: 10px;
   background: #333;
@@ -399,11 +412,6 @@ html, body {
   border-radius: 5px;
 }
 
-.ext-info p {
-  font-size: 0.7rem;
-  color: #ccc;
-}
-
 .add-to-sheet-btn {
   margin-top: 5px;
   background: #2ecc71;
@@ -419,5 +427,28 @@ html, body {
   text-align: center;
   padding: 40px 20px;
   color: var(--text-sub);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
+}
+
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.loader {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid var(--primary);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
