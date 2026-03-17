@@ -85,87 +85,73 @@ const App: React.FC = () => {
     }
   };
 
+  // 정보 추출 및 파싱 함수
   const handleExtract = async () => {
     if (!coupangUrl) return alert('링크 또는 코드를 입력해주세요!');
+    
     setExtracting(true);
     setExtractedData(null);
     setProgress(0);
 
-    // 1. HTML 코드 파싱 시도 (배너/iframe 등)
+    let finalLink = coupangUrl;
+    let initialTitle = '';
+    let initialImage = '';
+
+    // 1. HTML 코드인 경우 1차 파싱 (링크/이미지/상품명 추출)
     if (coupangUrl.includes('<')) {
-      setProgress(50);
-      try {
-        let title = '';
-        let image = '';
-        let link = '';
+      setProgress(30);
+      const hrefMatch = coupangUrl.match(/href="(.*?)"/);
+      const srcMatch = coupangUrl.match(/src="(.*?)"/);
+      const altMatch = coupangUrl.match(/alt="(.*?)"/);
+      const iframeSrcMatch = coupangUrl.match(/src="(.*?)"/);
 
-        const hrefMatch = coupangUrl.match(/href="(.*?)"/);
-        const srcMatch = coupangUrl.match(/src="(.*?)"/);
-        const altMatch = coupangUrl.match(/alt="(.*?)"/);
-        const iframeSrcMatch = coupangUrl.match(/src="(.*?)"/);
-
-        if (hrefMatch) link = hrefMatch[1];
-        if (srcMatch) image = srcMatch[1];
-        if (altMatch) title = altMatch[1];
-        
-        if (coupangUrl.includes('iframe') && !link) {
-          link = iframeSrcMatch ? iframeSrcMatch[1] : '';
-          title = '쿠팡 추천 상품 (위젯)';
-        }
-
-        if (link) {
-          setProgress(100);
-          setExtractedData({
-            name: title || '쿠팡 파트너스 상품',
-            price: '가격 확인',
-            image: image || 'https://via.placeholder.com/150',
-            link: link,
-            category: '전체'
-          });
-          setExtracting(false);
-          return;
-        }
-      } catch (e) { console.error(e); }
+      if (hrefMatch) finalLink = hrefMatch[1];
+      else if (iframeSrcMatch) finalLink = iframeSrcMatch[1];
+      
+      if (srcMatch) initialImage = srcMatch[1];
+      if (altMatch) initialTitle = altMatch[1];
     }
 
-    // 2. 일반 링크인 경우 서버 추출 로직 실행
+    // 2. 서버를 통해 상세 정보(특히 가격) 한 번 더 조회
     const timer = setInterval(() => {
-      setProgress(prev => (prev >= 95 ? prev : prev + Math.random() * 10));
+      setProgress(prev => (prev >= 90 ? prev : prev + Math.random() * 5));
     }, 300);
 
     try {
       const response = await fetch('/api/extract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: coupangUrl })
+        body: JSON.stringify({ url: finalLink })
       });
       const data = await response.json();
       
-      if (data.title === '상품명을 찾을 수 없습니다' || !data.image) {
-        alert('쿠팡 보안 정책으로 인해 정보를 자동으로 가져오지 못했습니다. 상품 정보를 직접 시트에 입력해 주세요.');
-        setExtracting(false);
-        return;
-      }
-
       setProgress(100);
       setTimeout(() => {
         setExtractedData({
-          name: data.title,
-          price: data.price,
-          image: data.image,
-          link: coupangUrl,
+          name: data.title !== '상품명을 찾을 수 없습니다' ? data.title : (initialTitle || '쿠팡 상품'),
+          price: data.price || '가격 확인 필요',
+          image: data.image || initialImage || 'https://via.placeholder.com/150',
+          link: finalLink,
           category: '전체'
         });
         setExtracting(false);
       }, 500);
     } catch (error) {
-      alert('추출 실패');
+      // 서버 추출 실패 시 1차 파싱 정보라도 보여줌
+      setExtractedData({
+        name: initialTitle || '쿠팡 상품',
+        price: '가격 확인 필요',
+        image: initialImage || 'https://via.placeholder.com/150',
+        link: finalLink,
+        category: '전체'
+      });
       setExtracting(false);
     } finally {
       clearInterval(timer);
     }
   };
 
+  // 구글 시트에 자동 추가 함수 (즉시 갱신 로직 추가)
   const handleAddToSheet = async () => {
     if (!extractedData) return;
     setAdding(true);
@@ -178,10 +164,13 @@ const App: React.FC = () => {
         body: JSON.stringify(extractedData)
       });
       
-      alert('✅ 구글 시트에 상품이 추가되었습니다!');
+      alert('✅ 시트에 등록되었습니다! 잠시 후 화면이 갱신됩니다.');
       setExtractedData(null);
       setCoupangUrl('');
+      
+      // 즉시 데이터 새로고침 (여러 번 시도하여 시트 반영 대기)
       setTimeout(fetchProducts, 3000);
+      setTimeout(fetchProducts, 6000);
     } catch (error) {
       alert('시트 추가 중 오류 발생');
     } finally {
