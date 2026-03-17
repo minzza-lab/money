@@ -25,13 +25,65 @@ body {
   overflow-x: hidden;
 }
 
+/* 전역 설정 보완 */
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden; /* 가로 스크롤 원천 차단 */
+  margin: 0;
+  padding: 0;
+}
+
 /* 앱 컨테이너 */
 .app-container {
-  max-width: 600px; /* 모바일 기준 너비 고정 */
+  width: 100%;
+  max-width: 600px; /* PC에서도 너무 넓지 않게 */
   margin: 0 auto;
   min-height: 100vh;
   background: var(--bg);
   position: relative;
+  overflow-x: hidden; /* 한 번 더 차단 */
+}
+
+/* 상품 리스트 (2열 고정 및 너비 정밀 계산) */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); /* 너비가 넘치지 않게 0에서 시작 */
+  gap: 10px;
+  padding: 10px; /* 내부 여백 */
+  width: 100%;
+}
+
+.product-card {
+  background: var(--card);
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  width: 100%; /* 부모 그리드에 딱 맞게 */
+}
+
+/* 히어로 섹션 */
+.hero-section {
+  width: 100%;
+  padding: 25px 15px;
+  background: #fff;
+  border-bottom-left-radius: 25px;
+  border-bottom-right-radius: 25px;
+  box-shadow: var(--shadow);
+  margin-bottom: 10px;
+}
+
+/* 상세 모달 크기 최적화 */
+.modal-content {
+  background: #fff;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  border-top-left-radius: 25px;
+  border-top-right-radius: 25px;
+  padding-bottom: env(safe-area-inset-bottom); /* 아이폰 하단 홈바 대응 */
 }
 
 /* 상단 티커 */
@@ -56,16 +108,6 @@ body {
 @keyframes ticker {
   0% { transform: translate3d(0, 0, 0); }
   100% { transform: translate3d(-100%, 0, 0); }
-}
-
-/* 헤더 & 검색 */
-.hero-section {
-  padding: 25px 20px;
-  background: #fff;
-  border-bottom-left-radius: 30px;
-  border-bottom-right-radius: 30px;
-  box-shadow: var(--shadow);
-  margin-bottom: 15px;
 }
 
 .main-title {
@@ -103,7 +145,7 @@ body {
   padding: 10px 20px;
   overflow-x: auto;
   scrollbar-width: none;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 }
 
 .category-bar::-webkit-scrollbar { display: none; }
@@ -128,26 +170,6 @@ body {
   color: #fff;
   border-color: var(--text-main);
 }
-
-/* 상품 리스트 (2열 고정) */
-.product-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  padding: 10px 15px;
-}
-
-.product-card {
-  background: var(--card);
-  border-radius: 18px;
-  overflow: hidden;
-  box-shadow: var(--shadow);
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
-
-.image-container {
   width: 100%;
   padding-top: 100%; /* 1:1 비율 */
   position: relative;
