@@ -86,11 +86,49 @@ const App: React.FC = () => {
   };
 
   const handleExtract = async () => {
-    if (!coupangUrl) return alert('쿠팡 링크를 입력해주세요!');
+    if (!coupangUrl) return alert('링크 또는 코드를 입력해주세요!');
     setExtracting(true);
     setExtractedData(null);
     setProgress(0);
 
+    // 1. HTML 코드 파싱 시도 (배너/iframe 등)
+    if (coupangUrl.includes('<')) {
+      setProgress(50);
+      try {
+        let title = '';
+        let image = '';
+        let link = '';
+
+        const hrefMatch = coupangUrl.match(/href="(.*?)"/);
+        const srcMatch = coupangUrl.match(/src="(.*?)"/);
+        const altMatch = coupangUrl.match(/alt="(.*?)"/);
+        const iframeSrcMatch = coupangUrl.match(/src="(.*?)"/);
+
+        if (hrefMatch) link = hrefMatch[1];
+        if (srcMatch) image = srcMatch[1];
+        if (altMatch) title = altMatch[1];
+        
+        if (coupangUrl.includes('iframe') && !link) {
+          link = iframeSrcMatch ? iframeSrcMatch[1] : '';
+          title = '쿠팡 추천 상품 (위젯)';
+        }
+
+        if (link) {
+          setProgress(100);
+          setExtractedData({
+            name: title || '쿠팡 파트너스 상품',
+            price: '가격 확인',
+            image: image || 'https://via.placeholder.com/150',
+            link: link,
+            category: '전체'
+          });
+          setExtracting(false);
+          return;
+        }
+      } catch (e) { console.error(e); }
+    }
+
+    // 2. 일반 링크인 경우 서버 추출 로직 실행
     const timer = setInterval(() => {
       setProgress(prev => (prev >= 95 ? prev : prev + Math.random() * 10));
     }, 300);
@@ -101,11 +139,10 @@ const App: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: coupangUrl })
       });
-
       const data = await response.json();
-
+      
       if (data.title === '상품명을 찾을 수 없습니다' || !data.image) {
-        alert('쿠팡 보안 정책으로 인해 정보를 가져오지 못했습니다. 잠시 후 다시 시도하거나, 상품 정보를 직접 시트에 입력해 주세요.');
+        alert('쿠팡 보안 정책으로 인해 정보를 자동으로 가져오지 못했습니다. 상품 정보를 직접 시트에 입력해 주세요.');
         setExtracting(false);
         return;
       }
@@ -122,10 +159,9 @@ const App: React.FC = () => {
         setExtracting(false);
       }, 500);
     } catch (error) {
-      alert('서버 연결 오류가 발생했습니다. 실제 배포된 사이트에서 테스트해 주세요!');
+      alert('추출 실패');
       setExtracting(false);
-    }
- finally {
+    } finally {
       clearInterval(timer);
     }
   };
@@ -145,7 +181,6 @@ const App: React.FC = () => {
       alert('✅ 구글 시트에 상품이 추가되었습니다!');
       setExtractedData(null);
       setCoupangUrl('');
-      // 데이터 새로고침
       setTimeout(fetchProducts, 3000);
     } catch (error) {
       alert('시트 추가 중 오류 발생');
@@ -182,14 +217,19 @@ const App: React.FC = () => {
             </div>
           </div>
           <div className="admin-extractor">
-            <input type="text" placeholder="쿠팡 상품 링크 입력" value={coupangUrl} onChange={(e) => setCoupangUrl(e.target.value)} />
-            <button onClick={handleExtract} disabled={extracting}>{extracting ? '⏳ 분석 중...' : '⚡ 정보 추출'}</button>
+            <textarea 
+              placeholder="쿠팡 링크 또는 HTML 코드를 붙여넣으세요" 
+              value={coupangUrl} 
+              onChange={(e) => setCoupangUrl(e.target.value)}
+              rows={3}
+            />
+            <button onClick={handleExtract} disabled={extracting}>{extracting ? '⏳ 분석 중...' : '⚡ 분석 및 추출'}</button>
           </div>
           
           {extracting && (
             <div className="progress-container">
               <div className="progress-bar" style={{ width: `${progress}%` }}></div>
-              <span className="progress-text">{Math.round(progress)}% 분석 중...</span>
+              <span className="progress-text">{Math.round(progress)}% 진행 중...</span>
             </div>
           )}
 
@@ -200,7 +240,7 @@ const App: React.FC = () => {
                 <p><strong>명칭:</strong> {extractedData.name}</p>
                 <p><strong>가격:</strong> {extractedData.price}</p>
                 <button className="add-to-sheet-btn" onClick={handleAddToSheet} disabled={adding}>
-                  {adding ? '🔄 등록 중...' : '✅ 이 상품을 구글 시트에 즉시 등록'}
+                  {adding ? '🔄 등록 중...' : '✅ 구글 시트에 즉시 등록'}
                 </button>
               </div>
             </div>
